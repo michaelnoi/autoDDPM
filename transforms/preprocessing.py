@@ -4,9 +4,9 @@ from monai.transforms import Transform
 from monai.utils.enums import TransformBackends
 from monai.config.type_definitions import NdarrayOrTensor
 import torchvision
-from torchvision.io.image import read_image
+import torchvision.transforms.functional as transform
 import torch.nn.functional as F
-
+import PIL
 
 
 class ReadImage(Transform):
@@ -26,7 +26,9 @@ class ReadImage(Transform):
             img = (img * 255).astype(np.uint8)
             return torch.tensor(img)
         elif '.jpeg' in path or '.jpg' in path or '.png' in path:
-            return read_image(path)
+            PIL_image = PIL.Image.open(path)
+            tensor_image = torch.squeeze(transform.to_tensor(PIL_image))
+            return tensor_image
         elif '.nii.gz' in path:
             import nibabel as nip
             from nibabel.imageglobals import LoggingOutputSuppressor
@@ -85,7 +87,14 @@ class To01:
         """
         Apply the transform to `img`.
         """
-        return img/self.max_val
+        if torch.max(img) <= 1.0:
+            # print(img.cpu().numpy().shape)
+            return img
+        # print(img.cpu().numpy().shape)
+        if torch.max(img) <= 255.0:
+            return img/255
+
+        return img / 65536
 
 
 

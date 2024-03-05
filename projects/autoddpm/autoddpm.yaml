@@ -9,8 +9,8 @@ checkpoint_path: &checkpoint_path ./projects/autoddpm/weights/runs/
 #
 experiment:
   name: DDPM
-  task: train
-  weights: # ./projects/autoddpm/weights/pretrained/Pretrainer_3000ep_128x/best_model.pt
+  task: test
+  weights: ./weights/anoddpm/Pretrainer_3000ep_128x/best_model.pt
 
 device: gpu
 configurator:
@@ -44,10 +44,11 @@ model:
     inference_steps: 1000
     noise_level_recon: 200
     noise_level_inpaint: 50
+    method: "autoDDPM"
     noise_type: "gaussian"
     prediction_type: "epsilon"
     resample_steps: 5
-    masking_threshold: 0.13
+    masking_threshold: 0.13 # COMMENT OUT OR SET TO -1 IF UNKNOWN, SHOULD BE SET ON THE VALIDATION OF EVERY DATASET INDIVIDUALLY
 
     # Thresholds on stroke data: 71, 570
     threshold_low: 1
@@ -65,7 +66,7 @@ trainer:
     input_size: *target_size
     checkpoint_path: *checkpoint_path
     batch_size: *tbatch_size
-    nr_epochs: 999
+    nr_epochs: 3000
     val_interval: 50
     # Loss
     loss:
@@ -88,9 +89,9 @@ trainer:
           class_name: IXILoader
         data_dir:
           train:
-            - './data/CAPS_IXI/splits/ixi_normal_train.csv'
+            - './data/fastMRI/splits/ixi_normal_train.csv'
           val:
-            - './data/fastMRI/normal_test.csv'
+            - './data/fastMRI/splits/normal_test.csv'
           test:
             - './data/ATLAS/splits/atlas_train_png.csv'
 
